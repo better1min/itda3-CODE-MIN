@@ -1,0 +1,19 @@
+# 모델 가중치 (download_weights.sh로 로컬에서 받아서 채움 - 절대 커밋 금지)
+weights/*
+!weights/.gitkeep
+
+# 채점/테스트용 이미지 데이터
+val_images/
+val_images*/
+
+# 결과물
+submission*.csv
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 가상환경
+.venv/
+venv/
