@@ -12,8 +12,7 @@
 #
 # 채점 서버는 오프라인이라, PaddleOCR 기본 동작(최초 실행 시 인터넷에서 자동 다운로드)이
 # 그대로 통하지 않음. download_weights.sh로 미리 받아둔 ./weights 폴더가 있으면 그
-# 로컬 경로에서 모델을 로딩하고(_model_dir), 없으면(로컬 개발 중 등) 기존처럼 이름만
-# 지정해서 PaddleX 기본 캐시/자동 다운로드를 그대로 쓰도록 폴백함.
+# 로컬 경로의 가중치만 사용하며, 가중치가 없으면 자동 다운로드를 시도하지 않고 오류를 발생시킴.
 
 import time
 from pathlib import Path
@@ -31,16 +30,24 @@ _REC_MODEL_DIR = _WEIGHTS_DIR / _REC_MODEL_NAME
 
 
 def _local_model_dir_kwargs():
-    """download_weights.sh로 받아둔 로컬 가중치가 있으면 그 경로를 강제해서, 오프라인
-    채점 환경에서 인터넷 자동 다운로드 시도 자체가 일어나지 않도록 함. 로컬 개발
-    환경처럼 ./weights가 아직 없으면 빈 dict를 반환해서 이름 기반 기본 동작(자동
-    다운로드/기본 캐시 사용)으로 자연스럽게 폴백함."""
-    kwargs = {}
-    if _DET_MODEL_DIR.exists():
-        kwargs["text_detection_model_dir"] = str(_DET_MODEL_DIR)
-    if _REC_MODEL_DIR.exists():
-        kwargs["text_recognition_model_dir"] = str(_REC_MODEL_DIR)
-    return kwargs
+    """사전 다운로드된 로컬 가중치만 사용한다.
+    가중치가 없으면 자동 다운로드를 시도하지 않고 즉시 오류를 발생시킨다."""
+    if not _DET_MODEL_DIR.exists():
+        raise FileNotFoundError(
+            f"Detection model not found: {_DET_MODEL_DIR}. "
+            "Run download_weights.sh before inference."
+        )
+
+    if not _REC_MODEL_DIR.exists():
+        raise FileNotFoundError(
+            f"Recognition model not found: {_REC_MODEL_DIR}. "
+            "Run download_weights.sh before inference."
+        )
+
+    return {
+        "text_detection_model_dir": str(_DET_MODEL_DIR),
+        "text_recognition_model_dir": str(_REC_MODEL_DIR),
+    }
 
 
 def _get_ocr():

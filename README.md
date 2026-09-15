@@ -17,7 +17,9 @@ itda3-CODE-MIN/
 └── weights/               # 다운로드된 모델 가중치 저장 폴더
 
 
-## 3. 오프라인 채점 환경 대응
+## 3. 실행 및 오프라인 채점 환경
+
+채점 환경은 Ubuntu 22.04 LTS (x86_64), Python 3.10, 4-Core CPU, RAM 8GB, GPU 미제공, 인터넷 차단 환경입니다.
 
 패키지 설치:
 
@@ -27,7 +29,13 @@ itda3-CODE-MIN/
 
     bash download_weights.sh
 
-실행:
+`download_weights.sh` 실행 시 필요한 PaddleOCR 가중치를 `./weights/`에 사전 다운로드합니다.
+
+`predict.ipynb`와 `ocr_worker.py`는 사전 다운로드된 `./weights/`의 모델만 사용하며, 추론 실행 중에는 모델 가중치를 다운로드하지 않습니다.
+
+입력 및 출력 경로는 `ITDA_INPUT_DIR`, `ITDA_OUTPUT_PATH` 환경변수로 지정합니다.
+
+채점 재현성 검증:
 
     export ITDA_INPUT_DIR=./val_images
     export ITDA_OUTPUT_PATH=./submission.csv
@@ -35,12 +43,6 @@ itda3-CODE-MIN/
     jupyter nbconvert --to notebook --execute predict.ipynb \
         --ExecutePreprocessor.timeout=2400 \
         --output /tmp/executed.ipynb
-
-채점 환경은 인터넷이 차단된 Standard 4-Core vCPU 환경입니다.
-
-- `download_weights.sh`를 통해 필요한 PaddleOCR 가중치를 사전에 `./weights/`에 준비합니다.
-- `predict.ipynb`와 `ocr_worker.py`는 로컬 `./weights/` 경로의 모델을 사용합니다.
-- 입력 및 출력 경로는 `ITDA_INPUT_DIR`, `ITDA_OUTPUT_PATH` 환경변수로 지정합니다.
 
 ## 4. 파이프라인 요약
 
